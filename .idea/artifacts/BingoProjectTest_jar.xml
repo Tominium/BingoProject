@@ -1,0 +1,11 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="BingoProjectTest:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/BingoProjectTest_jar</output-path>
+    <root id="archive" name="BingoProjectTest.jar">
+      <element id="module-output" name="BingoProjectTest" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../../flatlaf-1.5-sources.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../../flatlaf-1.5.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../../flatlaf-intellij-themes-1.5.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>
