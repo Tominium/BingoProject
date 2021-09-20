@@ -41,4 +41,19 @@
  Winning Cards: 9  
  Winning Cards: 5  
  Winning Cards: 31 
- Winning Cards: 45
+ Winning Cards: 45 
+ Winning Cards: 8  
+ Winning Cards: 28 
+ Winning Cards: 21 
+ Winning Cards: 9  
+ Winning Cards: 5  
+ Winning Cards: 31 
+ Winning Cards: 45 
+ Winning Cards: 8  
+ Winning Cards: 35 
+ Winning Cards: 62 
+ Winning Cards: 13 
+ Winning Cards: 51 
+ Winning Cards: 13 
+ Winning Cards: 28 
+ Winning Cards: 69

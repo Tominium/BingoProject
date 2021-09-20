@@ -2,21 +2,24 @@ import java.awt.image.*;
 import java.awt.*;
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Arrays;
+
 import java.util.Random;
 import java.util.Scanner;
 import javax.imageio.ImageIO;
 
 public class BingoCardBackend {
-    private static ArrayList<BingoCard> cards;
+    public static ArrayList<BingoCard> cards;
     private int cardNum;
     private static int numWins;
     private boolean view;
     private static int seed;
-    private int numDays;
+    private static int numDays;
     public static ArrayList<Integer> alr;
     public static ArrayList<Integer> ranArr;
+    public static ArrayList<TableObj> tableObjs;
+    public static ArrayList<Calendar> cal;
     public static Random run;
+    public static int ranPos;
 
     public BingoCardBackend(int s, int cn, int wn, int nd, boolean b){
         numDays = nd;
@@ -34,7 +37,7 @@ public class BingoCardBackend {
             cards.add(b);
         }
         if(view){PDF(); new BingoCardViewerFrame(cards, seed, numWins);}
-        else{printSimulator();}
+        else{PDF(); printSimulator();}
     }
 
     private void PDF(){
@@ -66,6 +69,11 @@ public class BingoCardBackend {
             }
         }
         catch(Exception e){e.printStackTrace();}
+        try {
+            Desktop.getDesktop().open(new File("BingoCards"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public static void findNum(int ran){
@@ -77,7 +85,7 @@ public class BingoCardBackend {
                 for(int r=0; r<temp.length; r++) {
                     ArrayList<Integer> temp1 = new ArrayList<>();
                     for(int a: temp[r]){temp1.add(a);}
-                    if (temp1.contains(ran)) {
+                    if (temp1.contains(ran)&&!cards.get(i).getWin()) {
                         cards.get(i).zero(r, temp1.indexOf(ran));
                         markNum(r, temp1.indexOf(ran), pos);
                     }
@@ -88,6 +96,9 @@ public class BingoCardBackend {
     public static void markNum(int r, int c, int pos){
         BufferedImage b = cards.get(pos).getImage();
         Graphics g = b.getGraphics();
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         //System.out.println("R: " + r + " C: " + c);
         r++; c++;
         r=100*r;
@@ -95,29 +106,6 @@ public class BingoCardBackend {
         g.setColor(new Color(255, 216, 102, 125));
         g.fillOval(c+25, r+25, 50, 50);
         cards.get(pos).changeImage(b);
-    }
-
-    public static String checkWin(){
-        String s = "";
-        if(alr==null) {
-            alr = new ArrayList<Integer>();
-        }
-        for(int i=0; i<cards.size(); i++){
-            int[][] temp = cards.get(i).getArr();
-            for(int r=0; r<temp.length&&alr.size() < numWins&&!cards.get(i).getWin(); r++){
-                int b = i+1;
-                if(temp[r][0]+temp[r][1]+temp[r][2]+temp[r][3]+temp[r][4]==0){s += b+ " ";alr.add(i);cards.get(i).setWin();}
-            }
-            for(int c=0; c<5&&alr.size() < numWins&&!cards.get(i).getWin(); c++){
-                int b = i+1;
-                if(temp[0][c]+temp[1][c]+temp[2][c]+temp[3][c]+temp[4][c]==0){if(!alr.contains(i)){s += b+ " ";alr.add(i);cards.get(i).setWin();}}
-            }
-            int b = i+1;
-            if(temp[0][0]+temp[1][1]+temp[2][2]+temp[3][3]+temp[4][4]==0&&alr.size() < numWins&&!cards.get(i).getWin()){if(!alr.contains(i)){s += b+ " ";alr.add(i);cards.get(i).setWin();}}
-            if(temp[4][0]+temp[3][1]+temp[2][2]+temp[1][3]+temp[0][4]==0&&alr.size() < numWins&&!cards.get(i).getWin()){if(!alr.contains(i)){s += b+ " ";alr.add(i);cards.get(i).setWin();}}
-        }
-        if(!s.isEmpty()){s = " \n Winning Cards: " + s + "\n";}
-        return s;
     }
 
     public static String checkWin(int a){
@@ -147,22 +135,26 @@ public class BingoCardBackend {
         if(ranArr==null){ranArr = new ArrayList<>();}
         if(run==null){run = new Random(seed);}
         int n = run.nextInt(75-1)+1;
-        if(ranArr.contains(n)){getNum();}
-       return n;
+        while(!ranArr.contains(n)){
+            ranArr.add(n);
+            n = run.nextInt(75-1)+1;
+        }
+       return ranArr.get(ranPos++);
     }
 
 
-    public void printSimulator(){
+    public static void printSimulator(){
         ArrayList<Recorder> winCards = new ArrayList<>();
-        ArrayList<Calendar> cal = new ArrayList<>();
+        tableObjs = new ArrayList<>();
+        cal = new ArrayList<>();
         ArrayList<Integer> arr = new ArrayList<Integer>();
-        Random ran = new Random(seed);
         while(winCards.size()<numWins){
             int n = getNum();
             arr.add(n);
-            System.out.println("Random Num: " + arr.get(arr.size()-1));
+            //System.out.println("Random Num: " + arr.get(arr.size()-1));
             findNum(arr.get(arr.size()-1));
-            String s = BingoCardBackend.checkWin(arr.size()-1);
+            String s = BingoCardBackend.checkWin(arr.get(arr.size()-1));
+            //System.out.println("Check Win: " + s);
             Scanner k = new Scanner(s.substring(s.indexOf(" ") + 1));
             while (k.hasNext() && winCards.size()<numWins) {
                 //System.out.println("winCards.add");
@@ -175,28 +167,33 @@ public class BingoCardBackend {
         if(arr.size()%(numDays*2) != 0){
             int i=0;
             int extra = arr.size()%(numDays*2);
-            while(extra>0){
+            while(extra!=0){
                 bPerR.set(i, bPerR.get(i)+1);
                 //System.out.println(bPerR.get(i));
                 extra--;
                 if(i==bPerR.size()-1){i=0;}
                 else{i++;}
             }
+            for(int a=bPerR.size()-1; a>=0; a--){if(bPerR.get(a)==0){bPerR.remove(a);}}
         }
-            for(int ii=0; ii<numDays; ii+=2){
+        System.out.println(arr.size()/(numDays*2));
+        System.out.println(bPerR);
+        System.out.println("----------------------------------------------------------");
+        ArrayList<Integer> temp2 = arr;
+            for(int ii=0; ii+1<=bPerR.size()-1; ii+=2){
                 ArrayList<Integer> temp = new ArrayList<>();
                 ArrayList<Integer> temp1 = new ArrayList<>();
-                ArrayList<Integer> temp2 = arr;
                 for(int b=0; b<bPerR.get(ii); b++){
                     temp.add(temp2.remove(0));
-                    System.out.println(temp.get(temp.size()-1));
                 }
+                System.out.println(temp);
+                System.out.println("----------------------------------------------------------");
                 for(int b=0; b<bPerR.get(ii+1); b++){
                     temp1.add(temp2.remove(0));
-                    System.out.println(temp1.get(temp1.size()-1));
                 }
+                System.out.println(temp1);
                 System.out.println("Calendar For Loop");
-                cal.add(new Calendar(ii+1, temp, temp1));
+                cal.add(new Calendar((ii/2)+1, temp, temp1));
             }
             String finalFile = "Winners\n" ;
             for(int a=0; a<winCards.size(); a++){
@@ -204,16 +201,27 @@ public class BingoCardBackend {
                 int rn = winCards.get(a).getRanNum();
                 int id = winCards.get(a).getCardId();
                 for(int b=0; b<cal.size(); b++){
-                    if(cal.get(b).getR1().contains(rn)){System.out.println("R1");finalFile += ("Day: " + cal.get(b).getDay() + " Round 1 "+ " Card: #" + id + "\n");}
-                    else if(cal.get(b).getR2().contains(rn)){System.out.println("R2");finalFile += ("Day: " + cal.get(b).getDay() +" Round 2 "+ " Card: #" + id + "\n");}
+                    System.out.println("Second For Loop");
+                    if(cal.get(b).getR1().contains(rn)){System.out.println("R1");finalFile += ("Day: " + cal.get(b).getDay() + " Round 1 "+ " Card: #" + id + "\n");tableObjs.add(new TableObj(cal.get(b).getDay(), 1, id));}
+                    else if(cal.get(b).getR2().contains(rn)){System.out.println("R2");finalFile += ("Day: " + cal.get(b).getDay() +" Round 2 "+ " Card: #" + id + "\n");tableObjs.add(new TableObj(cal.get(b).getDay(), 2, id));}
                 }
+            }
+            finalFile += "\n Called Numbers \n";
+            for(int a=0; a<cal.size();a++){
+                finalFile += "Day: " + cal.get(a).getDay() + " Round 1: ";
+                for(int b=0; b<cal.get(a).getR1().size(); b++){
+                    finalFile += cal.get(a).getR1().get(b) + " ";
+                }
+                finalFile += "\nDay: " + cal.get(a).getDay() + " Round 2: ";
+                for(int b=0; b<cal.get(a).getR2().size(); b++){
+                    finalFile += "" + cal.get(a).getR2().get(b) + " ";
+                }
+                finalFile += "\n";
             }
         try{PrintWriter output = new PrintWriter(new File("src/printSim.txt"));
             output.println(finalFile);
             output.close();}
         catch(IOException e){}
-
-
     }
 
 

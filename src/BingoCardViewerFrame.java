@@ -88,54 +88,15 @@ public class BingoCardViewerFrame extends JFrame{
         button.setSize(100, 20);
         button.setLocation(900, 900);
         sideComps.add(button);
+        ArrayList<Recorder> rec = new ArrayList<Recorder>();
         button.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
-                String s = BingoCardBackend.checkWin();
-                Scanner k = new Scanner(s.substring(s.indexOf(": ")+1));
-                while(k.hasNext()){winCards.add(Integer.parseInt(k.next()));}
-                if(winCards.size() == nw-1){
-                    button.setVisible(false);
-                    sideComps.add(results);
-                    if (!s.isBlank()) {
-                        String ss = s.substring(0, s.indexOf(": ") + 4);
-                        try {
-                            File tempFile = new File("src/data.txt");
-                            if (tempFile.exists()) {
-                                Files.write(Paths.get("src/data.txt"), ss.getBytes(), StandardOpenOption.APPEND);
-                            } else {
-                                PrintWriter output = new PrintWriter(new File("src/data.txt"));
-                                output.println(ss);
-                                output.close();
-                            }
-                            //PrintWriter output = new PrintWriter(new File("src/data.txt"));
-                        } catch (IOException b) {
-                        }
-                        winners.setText(winners.getText() + ss + "\n");
-                    }
-                    BingoCardViewerFrame.super.repaint();
-                }
-                else{
-                    if (!s.isBlank()) {
-                        String ss = s.substring(0, s.indexOf(": ") + 4);
-                        try {
-                            File tempFile = new File("src/data.txt");
-                            if (tempFile.exists()) {
-                                Files.write(Paths.get("src/data.txt"), ss.getBytes(), StandardOpenOption.APPEND);
-                            } else {
-                                PrintWriter output = new PrintWriter(new File("src/data.txt"));
-                                output.println(ss);
-                                output.close();
-                            }
-                            //PrintWriter output = new PrintWriter(new File("src/data.txt"));
-                        } catch (IOException b) {
-                        }
-                        winners.setText(winners.getText() + ss + "\n");
-                    }
-                    num = getNum();
-                    BingoCardBackend.findNum(num);
-                    ballViewer.setText(ballViewer.getText() + num + " ");
-                    BingoCardViewerFrame.super.repaint();
-                }
+                int n = BingoCardBackend.getNum();
+                BingoCardBackend.findNum(n);
+                ballViewer.setText(ballViewer.getText() + n + " ");
+                String s = BingoCardBackend.checkWin(n);
+                Scanner k  = new Scanner(s.substring(s.indexOf(" ")+1));
+
             }});
 
 
