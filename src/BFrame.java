@@ -70,26 +70,14 @@ public class BFrame extends JFrame {
         button.setSize(100, 20);
         button.setLocation(260, 250);
         win.add(button);
-        button.addActionListener(new ActionListener(){
-            public void actionPerformed(ActionEvent e){
-                if(inputField.getText().isBlank() || cardNum.getText().isBlank() || winNum.getText().isBlank()){
-                    try {
-                        throw new Exception();
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
-                }
-                else{new BingoCardBackend(Integer.parseInt(inputField.getText()), Integer.parseInt(cardNum.getText()), Integer.parseInt(winNum.getText()), Integer.parseInt(days.getText()), false);
-                    dispose();}
-            }
-        });
-        JButton b = new JButton("View Simulator");
+
+        JButton b = new JButton("View Simulation");
         b.setSize(150, 20);
         b.setLocation(235, 280);
         win.add(b);
         b.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
-                if(inputField.getText().isBlank() || cardNum.getText().isBlank() || winNum.getText().isBlank()){
+                if(inputField.getText().isBlank() || cardNum.getText().isBlank() || winNum.getText().isBlank() && Integer.parseInt(cardNum.getText()) >= Integer.parseInt(winNum.getText())){
                     try {
                         throw new Exception();
                     } catch (Exception ex) {
@@ -100,6 +88,33 @@ public class BFrame extends JFrame {
                     dispose();}
             }
         });
+
+        JButton simu = new JButton("View Simulation");
+        simu.setSize(150, 30);
+        simu.setLocation(235, 260);
+        simu.setVisible(false);
+        win.add(simu);
+        simu.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                new SimuTable();
+            }
+        });
+
+
+        button.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){
+                if(inputField.getText().isBlank() || cardNum.getText().isBlank() || winNum.getText().isBlank() && Integer.parseInt(cardNum.getText()) >= Integer.parseInt(winNum.getText())){
+                    try {
+                        throw new Exception();
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
+                else{new BingoCardBackend(Integer.parseInt(inputField.getText()), Integer.parseInt(cardNum.getText()), Integer.parseInt(winNum.getText()), Integer.parseInt(days.getText()), false);
+                    button.setVisible(false); b.setVisible(false); simu.setVisible(true);}
+            }
+        });
+
         JButton tutorial  = new JButton("How To");
         tutorial.setSize(100, 20);
         tutorial.setLocation(260, 310);

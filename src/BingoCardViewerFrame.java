@@ -1,30 +1,20 @@
-import java.awt.image.BufferedImage;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.util.Random;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
-import java.io.*;
+
 
 public class BingoCardViewerFrame extends JFrame{
     private static final int WIDTH = 1200;
     private static final int HEIGHT = 700;
     private int i;
-    private int num;
-    private static Random random;
-    private static ArrayList<Integer> arr;
 
     public BingoCardViewerFrame(ArrayList<BingoCard> buf, int s, int nw){
         super("Bingo Card Viewer");
         i=0;
-        arr = new ArrayList<Integer>();
-        random = new Random(s);
-        ArrayList<Integer> winCards = new ArrayList<>();
+        ArrayList<Recorder> rec = new ArrayList<>();
 
         setSize(WIDTH, HEIGHT);
         setDefaultCloseOperation((JFrame.EXIT_ON_CLOSE));
@@ -80,23 +70,40 @@ public class BingoCardViewerFrame extends JFrame{
         winners.setSize(new Dimension(500, 300));
         sideComps.add(scroll1);
 
-        JButton results = new JButton("Show Results");
+        JButton results = new JButton("View Results");
         results.setSize(100, 20);
         results.setLocation(900, 900);
+        results.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                BingoCardBackend.simulator(rec, nw);
+            }
+        });
 
         JButton button = new JButton("Draw Ball");
         button.setSize(100, 20);
         button.setLocation(900, 900);
         sideComps.add(button);
-        ArrayList<Recorder> rec = new ArrayList<Recorder>();
         button.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
-                int n = BingoCardBackend.getNum();
-                BingoCardBackend.findNum(n);
-                ballViewer.setText(ballViewer.getText() + n + " ");
-                String s = BingoCardBackend.checkWin(n);
-                Scanner k  = new Scanner(s.substring(s.indexOf(" ")+1));
-
+                if(rec.size() < nw){
+                    int n = BingoCardBackend.getNum();
+                    BingoCardBackend.findNum(n);
+                    ballViewer.setText(ballViewer.getText() + n + " ");
+                    String s = BingoCardBackend.checkWin(n);
+                    Scanner k = new Scanner(s.substring(s.indexOf(" ") + 1));
+                    if (!s.isBlank()) {
+                        while(k.hasNext()){
+                            int id = k.nextInt();
+                            winners.setText(winners.getText() + "Card: " + id + "\n\n");
+                            rec.add(new Recorder(n, id));
+                        }
+                    }
+                }
+                else{
+                    button.setVisible(false);
+                    sideComps.add(results);
+                }
             }});
 
 
@@ -111,15 +118,4 @@ public class BingoCardViewerFrame extends JFrame{
         });
     }
 
-    public static int getNum() {
-        int n = random.nextInt(75 - 1) + 1;
-        if (arr.contains(n)) {
-            n = random.nextInt(75 - 1) + 1;
-            if (!arr.contains(n)) {
-
-            }
-        }
-        arr.add(n);
-        return n;
-    }
 }

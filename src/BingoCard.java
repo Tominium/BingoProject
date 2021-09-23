@@ -65,6 +65,9 @@ public class BingoCard {
         try {
             BufferedImage image = new BufferedImage(600, 700, BufferedImage.TYPE_INT_ARGB);
             Graphics g = image.getGraphics();
+            Graphics2D g2d = (Graphics2D) g;
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
             int i = 0;
             g.setColor(new Color(255, 216, 102));
             g.fillRect(100,0,500,150);
@@ -76,7 +79,7 @@ public class BingoCard {
             g.drawString("G", 418, 95);
             g.drawString("O", 517, 95);
             g.setFont(id_font);
-            g.drawString("" + id, 585, 20 );
+            g.drawString("" + id, 575, 20 );
             for(int r=100; r<=500; r+=100){
                 for(int c=100; c<=500; c+=100){
                     if(i==0){
@@ -104,6 +107,9 @@ public class BingoCard {
         try {
             BufferedImage image = createOutline();
             Graphics g = image.getGraphics();
+            Graphics2D g2d = (Graphics2D) g;
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
             g.setFont(font2);
             for(int r=100; r<=500; r+=100){
                 for(int c=100; c<=500; c+=100){

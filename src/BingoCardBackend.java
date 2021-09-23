@@ -42,7 +42,7 @@ public class BingoCardBackend {
 
     private void PDF(){
         int complete = cardNum/4;
-        new File("BingoCards").mkdirs();
+        new File("Bingo Cards").mkdirs();
         try{
             int pos=0;
             for(int i=0; i<complete; i++){
@@ -54,7 +54,7 @@ public class BingoCardBackend {
                         pos++;
                     }
                 }
-                ImageIO.write(image, "png", new File("BingoCards/"+(i+1)+ ".png"));
+                ImageIO.write(image, "png", new File("Bingo Cards/"+(i+1)+ ".png"));
             }
             if(complete*4!=cardNum){
                 BufferedImage image = new BufferedImage(2550, 3300, BufferedImage.TYPE_INT_ARGB);
@@ -65,12 +65,12 @@ public class BingoCardBackend {
                         pos++;
                     }
                 }
-                ImageIO.write(image, "png", new File("BingoCards/" + (complete + 1) + ".png"));
+                ImageIO.write(image, "png", new File("Bingo Cards/" + (complete + 1) + ".png"));
             }
         }
         catch(Exception e){e.printStackTrace();}
         try {
-            Desktop.getDesktop().open(new File("BingoCards"));
+            Desktop.getDesktop().open(new File("Bingo Cards"));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -108,6 +108,28 @@ public class BingoCardBackend {
         cards.get(pos).changeImage(b);
     }
 
+    public static void markWin(int pos){
+        BufferedImage image = cards.get(pos).getImage();
+        Graphics g = image.getGraphics();
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        Font font;
+
+        try {
+            font = Font.createFont(Font.TRUETYPE_FONT, new Object() { }.getClass().getClassLoader().getResourceAsStream("carbon.ttf")).deriveFont(160f);
+            GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+            ge.registerFont(font);
+            g.setFont(font);
+            g.setColor(new Color(255, 216, 102, 125));
+            g.drawString("WON", 200, 380);
+            cards.get(pos).changeImage(image);
+
+        } catch (IOException | FontFormatException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static String checkWin(int a){
         String s = "";
         if(alr==null) {
@@ -117,15 +139,15 @@ public class BingoCardBackend {
             int[][] temp = cards.get(i).getArr();
             for(int r=0; r<temp.length&&alr.size() < numWins&&!cards.get(i).getWin(); r++){
                 int b = i+1;
-                if(temp[r][0]+temp[r][1]+temp[r][2]+temp[r][3]+temp[r][4]==0){s += b+ " ";alr.add(i);cards.get(i).setWin();}
+                if(temp[r][0]+temp[r][1]+temp[r][2]+temp[r][3]+temp[r][4]==0){s += b+ " ";alr.add(i);cards.get(i).setWin(); markWin(i); markNum(2,2,i);}
             }
             for(int c=0; c<5&&alr.size() < numWins&&!cards.get(i).getWin(); c++){
                 int b = i+1;
-                if(temp[0][c]+temp[1][c]+temp[2][c]+temp[3][c]+temp[4][c]==0){if(!alr.contains(i)){s += b+ " ";alr.add(i);cards.get(i).setWin();}}
+                if(temp[0][c]+temp[1][c]+temp[2][c]+temp[3][c]+temp[4][c]==0){if(!alr.contains(i)){s += b+ " ";alr.add(i);cards.get(i).setWin();markWin(i);markNum(2,2,i);}}
             }
             int b = i+1;
-            if(temp[0][0]+temp[1][1]+temp[2][2]+temp[3][3]+temp[4][4]==0&&alr.size() < numWins&&!cards.get(i).getWin()){if(!alr.contains(i)){s += b+ " ";alr.add(i);cards.get(i).setWin();}}
-            if(temp[4][0]+temp[3][1]+temp[2][2]+temp[1][3]+temp[0][4]==0&&alr.size() < numWins&&!cards.get(i).getWin()){if(!alr.contains(i)){s += b+ " ";alr.add(i);cards.get(i).setWin();}}
+            if(temp[0][0]+temp[1][1]+temp[2][2]+temp[3][3]+temp[4][4]==0&&alr.size() < numWins&&!cards.get(i).getWin()){if(!alr.contains(i)){s += b+ " ";alr.add(i);cards.get(i).setWin();markWin(i);markNum(2,2,i);}}
+            if(temp[4][0]+temp[3][1]+temp[2][2]+temp[1][3]+temp[0][4]==0&&alr.size() < numWins&&!cards.get(i).getWin()){if(!alr.contains(i)){s += b+ " ";alr.add(i);cards.get(i).setWin();markWin(i);markNum(2,2,i);}}
         }
         if(!s.isEmpty()){s = a + " " + s;}
         return s;
@@ -218,10 +240,80 @@ public class BingoCardBackend {
                 }
                 finalFile += "\n";
             }
-        try{PrintWriter output = new PrintWriter(new File("src/printSim.txt"));
+        try{PrintWriter output = new PrintWriter(new File("Bingo Cards/printSim.txt"));
             output.println(finalFile);
             output.close();}
         catch(IOException e){}
+    }
+
+
+
+
+    public static void simulator(ArrayList<Recorder> rec, int nw){
+        ArrayList<TableObj> tableOb = new ArrayList<>();
+        cal = new ArrayList<Calendar>();
+
+        ArrayList<Integer> bPerR = new ArrayList<>(); //int[arr.size()/(numDays*2)];
+        for(int a=0; a<nw*2; a++){bPerR.add(ranArr.size()/(nw*2));}
+        if(ranArr.size()%(nw*2) != 0){
+            int i=0;
+            int extra = ranArr.size()%(nw*2);
+            while(extra!=0){
+                bPerR.set(i, bPerR.get(i)+1);
+                //System.out.println(bPerR.get(i));
+                extra--;
+                if(i==bPerR.size()-1){i=0;}
+                else{i++;}
+            }
+            for(int a=bPerR.size()-1; a>=0; a--){if(bPerR.get(a)==0){bPerR.remove(a);}}
+        }
+        System.out.println(ranArr.size()/(numDays*2));
+        System.out.println(bPerR);
+        System.out.println("----------------------------------------------------------");
+        ArrayList<Integer> temp2 = ranArr;
+        for(int ii=0; ii+1<=bPerR.size()-1; ii+=2){
+            ArrayList<Integer> temp = new ArrayList<>();
+            ArrayList<Integer> temp1 = new ArrayList<>();
+            for(int b=0; b<bPerR.get(ii); b++){
+                temp.add(temp2.remove(0));
+            }
+            System.out.println(temp);
+            System.out.println("----------------------------------------------------------");
+            for(int b=0; b<bPerR.get(ii+1); b++){
+                temp1.add(temp2.remove(0));
+            }
+            System.out.println(temp1);
+            System.out.println("Calendar For Loop");
+            cal.add(new Calendar((ii/2)+1, temp, temp1));
+        }
+        String finalFile = "Winners\n" ;
+        for(int a=0; a<rec.size(); a++){
+            System.out.println("First For Loop");
+            int rn = rec.get(a).getRanNum();
+            int id = rec.get(a).getCardId();
+            for(int b=0; b<cal.size(); b++){
+                System.out.println("Second For Loop");
+                if(cal.get(b).getR1().contains(rn)){System.out.println("R1");finalFile += ("Day: " + cal.get(b).getDay() + " Round 1 "+ " Card: #" + id + "\n");tableOb.add(new TableObj(cal.get(b).getDay(), 1, id));}
+                else if(cal.get(b).getR2().contains(rn)){System.out.println("R2");finalFile += ("Day: " + cal.get(b).getDay() +" Round 2 "+ " Card: #" + id + "\n");tableOb.add(new TableObj(cal.get(b).getDay(), 2, id));}
+            }
+        }
+        finalFile += "\n Called Numbers \n";
+        for(int a=0; a<cal.size();a++){
+            finalFile += "Day: " + cal.get(a).getDay() + " Round 1: ";
+            for(int b=0; b<cal.get(a).getR1().size(); b++){
+                finalFile += cal.get(a).getR1().get(b) + " ";
+            }
+            finalFile += "\nDay: " + cal.get(a).getDay() + " Round 2: ";
+            for(int b=0; b<cal.get(a).getR2().size(); b++){
+                finalFile += "" + cal.get(a).getR2().get(b) + " ";
+            }
+            finalFile += "\n";
+        }
+        try{PrintWriter output = new PrintWriter(new File("Bingo Cards/printSim.txt"));
+            output.println(finalFile);
+            output.close();}
+        catch(IOException e){}
+        new SimuTable(tableOb);
     }
 
 
